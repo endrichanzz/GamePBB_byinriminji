@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPB Games by Indrii</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+  body{background:#0f0f1a;color:white;min-height:100vh}
+  header{text-align:center;padding:40px 20px 20px;background:linear-gradient(135deg,#ff5e8a,#ff9a5a)}
+  header h1{font-size:42px;letter-spacing:1px}
+  header p{opacity:.9;margin-top:8px}
+  .search{max-width:500px;margin:20px auto;display:block;width:90%;padding:12px 18px;border-radius:30px;border:none;outline:none;font-size:16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;padding:20px;max-width:1100px;margin:auto}
+  .card{background:#1e1e32;border-radius:18px;overflow:hidden;cursor:pointer;transition:.2s;border:2px solid transparent}
+  .card:hover{transform:translateY(-5px);border-color:#ff5e8a}
+  .card .thumb{height:150px;display:flex;align-items:center;justify-content:center;font-size:70px}
+  .card h3{padding:12px 16px 4px}
+  .card p{padding:0 16px 16px;color:#aaa;font-size:14px}
+  .card button{margin:0 16px 16px;padding:8px 18px;border:none;border-radius:20px;background:#ff5e8a;color:white;cursor:pointer;font-weight:bold}
+  #gameArea{display:none;max-width:700px;margin:20px auto;background:#1e1e32;padding:20px;border-radius:20px;text-align:center}
+  #gameArea button{padding:10px 20px;border:none;border-radius:20px;background:#ff4757;color:white;cursor:pointer;margin-bottom:15px}
+  canvas{background:#111;border-radius:12px;max-width:100%}
+  .quiz-btn{display:block;width:100%;padding:12px;margin:8px 0;border:none;border-radius:12px;background:#2f2f4d;color:white;cursor:pointer;text-align:left}
+  .quiz-btn:hover{background:#ff5e8a}
+  footer{text-align:center;padding:20px;color:#777;font-size:13px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎮 PPB GAMES</h1>
+  <p>By Indrii • Main Gratis, Tanpa Download • Buat Tugas PPB</p>
+</header>
+
+<input class="search" id="search" placeholder="🔍 Cari game..." oninput="filterGame()">
+
+<div class="grid" id="grid">
+  <div class="card" data-name="snake ular">
+    <div class="thumb" style="background:#2ed573">🐍</div>
+    <h3>Snake Ular</h3><p>Game ular klasik, makan apel biar makin panjang!</p>
+    <button onclick="openGame('snake')">▶ MAIN</button>
+  </div>
+  <div class="card" data-name="tebak angka">
+    <div class="thumb" style="background:#ffa502">🔢</div>
+    <h3>Tebak Angka</h3><p>Tebak angka 1-100, cuma 7x kesempatan!</p>
+    <button onclick="openGame('tebak')">▶ MAIN</button>
+  </div>
+  <div class="card" data-name="memory kartu">
+    <div class="thumb" style="background:#eccc68">🃏</div>
+    <h3>Memory Kartu</h3><p>Cari pasangan kartu yang sama, asah otak!</p>
+    <button onclick="openGame('memory')">▶ MAIN</button>
+  </div>
+  <div class="card" data-name="quiz ppb">
+    <div class="thumb" style="background:#ff6b81">📚</div>
+    <h3>Quiz PPB</h3><p>Quiz seputar Pemrograman Perangkat Bergerak!</p>
+    <button onclick="openGame('quiz')">▶ MAIN</button>
+  </div>
+</div>
+
+<div id="gameArea">
+  <button onclick="closeGame()">✕ Tutup Game</button>
+  <h2 id="gameTitle"></h2>
+  <div id="gameContent"></div>
+</div>
+
+<footer>© 2026 PPB Games by Indrii • Dibuat untuk tugas PPB</footer>
+
+<script>
+function filterGame(){
+  let q=document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('.card').forEach(c=>{
+    c.style.display=c.dataset.name.includes(q)?'block':'none';
+  });
+}
+function openGame(type){
+  document.getElementById('gameArea').style.display='block';
+  document.getElementById('gameArea').scrollIntoView({behavior:'smooth'});
+  let content=document.getElementById('gameContent');
+  let title=document.getElementById('gameTitle');
+  if(type=='snake'){
+    title.innerText='🐍 Snake Ular';
+    content.innerHTML='<p>Skor: <b id="score">0</b></p><canvas id="c" width="400" height="400"></canvas><p>Pakai tombol panah / WASD.</p>';
+    startSnake();
+  }
+  if(type=='tebak'){
+    title.innerText='🔢 Tebak Angka';
+    let secret=Math.floor(Math.random()*100)+1, nyawa=7;
+    content.innerHTML=`<p>Aku mikirin angka 1-100. Sisa: <b id="nyawa">7</b></p><input id="inp" type="number" placeholder="Masukkan angka" style="padding:10px;border-radius:10px;border:none;width:70%"><button onclick="cek()" style="padding:10px 16px;border:none;border-radius:10px;background:#ff5e8a;color:white;margin-left:5px">Cek</button><p id="hasil"></p>`;
+    window.cek=()=>{
+      let v=+document.getElementById('inp').value; nyawa--;
+      document.getElementById('nyawa').innerText=nyawa;
+      if(v==secret) document.getElementById('hasil').innerText='🎉 BENAR! Kamu hebat!';
+      else if(nyawa==0) document.getElementById('hasil').innerText='😭 Game Over! Angkanya '+secret;
+      else document.getElementById('hasil').innerText= v<secret ? '📈 Kurang gede!' : '📉 Kegedean!';
+    }
+  }
+  if(type=='memory'){
+    title.innerText='🃏 Memory Kartu';
+    let emojis=['🍎','🍎','🍌','🍌','🍇','🍇','🍓','🍓','🥝','🥝','🍍','🍍'];
+    emojis.sort(()=>Math.random()-0.5);
+    let first=null, lock=false, pasangan=0;
+    content.innerHTML='<div id="board" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div><p id="mHasil"></p>';
+    let board=document.getElementById('board');
+    emojis.forEach((e,i)=>{
+      let b=document.createElement('button');
+      b.innerText='❓'; b.style.cssText='padding:20px;font-size:28px;border:none;border-radius:12px;background:#2f2f4d;cursor:pointer';
+      b.onclick=()=>{
+        if(lock||b.innerText!= '❓') return;
+        b.innerText=e;
+        if(!first) first=b;
+        else{
+          if(first.innerText==b.innerText){ pasangan++; first=null; if(pasangan==6) document.getElementById('mHasil').innerText='🎉 MENANG! Semua ketemu!'; }
+          else{ lock=true; let f=first; first=null; setTimeout(()=>{f.innerText='❓'; b.innerText='❓'; lock=false;},700); }
+        }
+      };
+      board.appendChild(b);
+    });
+  }
+  if(type=='quiz'){
+    title.innerText='📚 Quiz PPB';
+    let soal=[{q:'HTML itu singkatan dari?',a:['Hyper Text Markup Language','High Text Machine Language','Hyper Tool Markup Language'],b:0},{q:'Untuk membuat aplikasi Android pakai bahasa?',a:['Kotlin / Java','Python saja','HTML saja'],b:0},{q:'Flutter dibuat oleh?',a:['Google','Microsoft','Apple'],b:0}];
+    let idx=0, skor=0;
+    function tampil(){
+      if(idx>=soal.length){ content.innerHTML=`<h3>Skor kamu: ${skor}/${soal.length}</h3><button onclick="openGame('quiz')">Main Lagi</button>`; return; }
+      let s=soal[idx];
+      content.innerHTML=`<h3>${s.q}</h3>`+s.a.map((x,i)=>`<button class="quiz-btn" onclick="jawab(${i})">${x}</button>`).join('');
+    }
+    window.jawab=(i)=>{ if(i==soal[idx].b) skor++; idx++; tampil(); };
+    tampil();
+  }
+}
+function closeGame(){ document.getElementById('gameArea').style.display='none'; }
+function startSnake(){
+  let cv=document.getElementById('c'), ctx=cv.getContext('2d');
+  let snake=[{x:200,y:200}], dir={x:20,y:0}, food={x:100,y:100}, score=0;
+  document.onkeydown=e=>{
+    if(e.key=='ArrowUp') dir={x:0,y:-20}; if(e.key=='ArrowDown') dir={x:0,y:20};
+    if(e.key=='ArrowLeft') dir={x:-20,y:0}; if(e.key=='ArrowRight') dir={x:20,y:0};
+  };
+  let it=setInterval(()=>{
+    if(document.getElementById('gameArea').style.display=='none'){clearInterval(it);return;}
+    let head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+    if(head.x<0||head.y<0||head.x>=400||head.y>=400){clearInterval(it); alert('Game Over! Skor: '+score); return;}
+    snake.unshift(head);
+    if(head.x==food.x&&head.y==food.y){score+=10; document.getElementById('score').innerText=score; food={x:Math.floor(Math.random()*20)*20,y:Math.floor(Math.random()*20)*20};}
+    else snake.pop();
+    ctx.fillStyle='#111'; ctx.fillRect(0,0,400,400);
+    ctx.fillStyle='red'; ctx.fillRect(food.x,food.y,18,18);
+    ctx.fillStyle='#2ed573'; snake.forEach(s=>ctx.fillRect(s.x,s.y,18,18));
+  },120);
+}
+</script>
+</body>
+</html>
